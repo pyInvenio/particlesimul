@@ -8,6 +8,7 @@ pub struct Body {
     pub velocity: Vec3,
     pub acceleration: Vec3,
     pub mass: f32,
+    pub density: f32,
 }
 
 pub trait Particle {
@@ -16,10 +17,14 @@ pub trait Particle {
     fn velocity(&self) -> Vec3;
     fn acceleration(&self) -> Vec3;
     fn mass(&self) -> f32;
+    fn density(&self) -> f32;
 
     fn set_position(&mut self, position: Vec3);
     fn set_velocity(&mut self, velocity: Vec3);
     fn set_acceleration(&mut self, acceleration: Vec3);
+
+    fn new_position(&mut self, dt: f32);
+    fn new_velocity(&mut self, dt: f32);
 
 }
 
@@ -40,6 +45,9 @@ impl Particle for Body {
         self.mass
     }
 
+    fn density(&self) -> f32 {
+        self.density
+    }
 
     fn set_position(&mut self, position: Vec3) {
         self.position = position;
@@ -51,5 +59,13 @@ impl Particle for Body {
 
     fn set_acceleration(&mut self, acceleration: Vec3) {
         self.acceleration = acceleration;
+    }
+
+    fn new_position(&mut self, dt: f32) {
+        self.set_position(self.position + self.velocity * dt);
+    }
+
+    fn new_velocity(&mut self, dt: f32) {
+        self.set_velocity(self.velocity + self.acceleration * dt);
     }
 }
