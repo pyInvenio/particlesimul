@@ -3,6 +3,9 @@ use ultraviolet::Vec3;
 
 use bevy::ecs::system::{EntityCommands, Res};
 use bevy::prelude::*;
+use rand::prelude::*;
+
+use crate::compute::Compute;
 
 const G: f32 = 6.67430e-11;
 
@@ -24,6 +27,17 @@ pub struct Scene {
 
 
 pub struct DefaultScene {
+    pub bodies: Vec<Body>,
+}
+pub struct FigureEight {
+    pub bodies: Vec<Body>,
+}
+
+pub struct SolarSystem {
+    pub bodies: Vec<Body>,
+}
+
+pub struct CustomScene {
     pub bodies: Vec<Body>,
 }
 
@@ -65,6 +79,7 @@ impl DefaultScene {
         }
     }
 }
+
 
 impl CustomScene {
     pub fn new(count: usize, min_mass: f32, max_mass: f32) -> Scene {
@@ -176,7 +191,6 @@ pub fn create_scene(
     bodies_min_mass: Option<f32>,
     bodies_max_mass: Option<f32>,
 ) -> Scene {
-
     match st {
         SceneType::CustomScene => {
             let count = match bodies_count {
@@ -197,8 +211,14 @@ pub fn create_scene(
         SceneType::DefaultScene => DefaultScene::new(),
         SceneType::FigureEight => FigureEight::new(),
         SceneType::SolarSystem => SolarSystem::new(),
-    } {
-
     }
 }
 
+pub fn render_and_simulate(scene : &mut Scene, dt: f32) {
+    scene.compute.simulate(dt, G);
+
+    for i in 0..scene.bodies.len() {
+        let body = &scene.bodies[i];
+        println!("Body {} position: {:?}", i, body.position);
+    }
+}

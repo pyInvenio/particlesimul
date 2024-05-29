@@ -4,12 +4,12 @@ use crate::particle::{Body, Particle};
 
 pub struct Compute {
     // vector of particles
-    particles : Vec<Body>,
+    pub particles : Vec<Body>,
 }
 
 // impl compute for the Body struct
 impl Compute {
-    fn calculate_force(&self, p1: &Body, p2: &Body, G:f32) -> Vec3 {
+    pub fn calculate_force(&self, p1: &Body, p2: &Body, G:f32) -> Vec3 {
         let r = p2.position() - p1.position();
         let r_mag = r.mag();
         let mut r_hat = r.clone();
@@ -18,11 +18,11 @@ impl Compute {
         r_hat * force_mag
     }
 
-    fn calculate_acceleration(&self, p: &Body, force: Vec3) -> Vec3 {
+    pub fn calculate_acceleration(&self, p: &Body, force: Vec3) -> Vec3 {
         force / p.mass()
     }
 
-    fn simulate(&mut self, dt: f32, G:f32) {
+    pub fn simulate(&mut self, dt: f32, G:f32) {
         let mut forces = vec![Vec3::zero(); self.particles.len()];
 
         for i in 0..self.particles.len() {
