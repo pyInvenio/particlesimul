@@ -39,46 +39,48 @@ pub struct SolarSystem {
 
 pub struct CustomScene {
     pub bodies: Vec<Body>,
-}
-
-impl DefaultScene {
+}impl DefaultScene {
     pub fn new() -> Scene {
         let mut bodies = Vec::new();
         let sun = Body {
             position: Vec3::zero(),
             velocity: Vec3::zero(),
             acceleration: Vec3::zero(),
-            mass: 1.989e30,
-            density: 1410.0,
+            mass: 1.0, // Arbitrary mass for the Sun
+            density: 1400.0,
         };
         let earth = Body {
-            position: Vec3::new(1.496e11, 0.0, 0.0),
-            velocity: Vec3::new(0.0, 29783.0, 0.0),
+            position: Vec3::new(1.0, 0.0, 0.0), // Arbitrary distance from the Sun
+            velocity: Vec3::new(0.0, 1.0, 0.0), // Arbitrary velocity
             acceleration: Vec3::zero(),
-            mass: 5.972e24,
-            density: 5515.0,
+            mass: 0.001, // Arbitrary mass for the Earth
+            density: 5500.0,
         };
         let moon = Body {
-            position: Vec3::new(1.496e11 + 3.844e8, 0.0, 0.0),
-            velocity: Vec3::new(0.0, 29783.0 + 1022.0, 0.0),
+            position: Vec3::new(1.2, 0.0, 0.0), // Arbitrary distance from the Earth
+            velocity: Vec3::new(0.0, 1.2, 0.0), // Arbitrary velocity
             acceleration: Vec3::zero(),
-            mass: 7.342e22,
-            density: 3344.0,
+            mass: 0.0001, // Arbitrary mass for the Moon
+            density: 3300.0,
         };
+
         bodies.push(sun);
         bodies.push(earth);
         bodies.push(moon);
-        let compute = Compute { particles: bodies.clone() };
+
+        let compute = Compute {};
+
         Scene {
             scene_type: SceneType::DefaultScene,
-            bodies_count: 3,
+            bodies_count: bodies.len(),
             bodies,
-            bodies_min_mass: 1.0,
-            bodies_max_mass: 5.0,
+            bodies_min_mass: 0.0001,
+            bodies_max_mass: 1.0,
             compute,
         }
     }
 }
+
 
 
 impl CustomScene {
@@ -94,7 +96,7 @@ impl CustomScene {
             };
             bodies.push(body);
         }
-        let compute = Compute { particles: bodies.clone() };
+        let compute = Compute {};
         Scene {
             scene_type: SceneType::CustomScene,
             bodies_count: count,
@@ -133,7 +135,7 @@ impl FigureEight {
         bodies.push(sun);
         bodies.push(earth);
         bodies.push(moon);
-        let compute = Compute { particles: bodies.clone() };
+        let compute = Compute {};
         Scene {
             scene_type: SceneType::FigureEight,
             bodies_count: 3,
@@ -172,7 +174,7 @@ impl SolarSystem {
         bodies.push(sun);
         bodies.push(earth);
         bodies.push(moon);
-        let compute = Compute { particles: bodies.clone() };
+        let compute = Compute {};
         Scene {
             scene_type: SceneType::SolarSystem,
             bodies_count: 3,
@@ -215,7 +217,7 @@ pub fn create_scene(
 }
 
 pub fn render_and_simulate(scene : &mut Scene, dt: f32) {
-    scene.compute.simulate(dt, G);
+    scene.compute.simulate(dt, G, &mut scene.bodies);
 
     for i in 0..scene.bodies.len() {
         let body = &scene.bodies[i];

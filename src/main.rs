@@ -10,4 +10,11 @@ use particle::Body;
 use particlesimul::scenedata::*;
 
 fn main() {
+    let mut scene = create_scene(SceneType::DefaultScene, None, None, None);
+
+    // simulate and print out the positions of the particles
+    for _ in 0..100 {
+        render_and_simulate(&mut scene, 0.1);
+    }
+
 }
