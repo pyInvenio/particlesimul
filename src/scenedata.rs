@@ -1,6 +1,5 @@
 use crate::particle::{Body, Particle};
 use ultraviolet::Vec3;
-
 use bevy::ecs::system::{EntityCommands, Res};
 use bevy::prelude::*;
 use rand::prelude::*;
@@ -9,6 +8,39 @@ use crate::compute::Compute;
 
 const G: f32 = 6.67430e-11;
 
+#[derive(Bundle)]
+pub struct BodyBundle {
+    pub body: Body,
+    pub transform: Transform,
+    pub sprite: SpriteBundle,
+}
+
+impl BodyBundle {
+    pub fn new(body: Body) -> Self {
+        let bevy_vec3: bevy::prelude::Vec3 =
+            bevy::prelude::Vec3::new(body.position.x, body.position.y, body.position.z);
+
+        let random_color = Color::rgb(
+            rand::random::<f32>(),
+            rand::random::<f32>(),
+            rand::random::<f32>(),
+        );
+        BodyBundle {
+            body,
+            transform: Transform::from_translation(bevy_vec3),
+            sprite: SpriteBundle {
+                transform: Transform::from_translation(bevy_vec3),
+                sprite: Sprite {
+                    color: random_color,
+                    custom_size: Some(Vec2::new(5.0, 5.0)),
+                    ..default()
+                },
+                ..default()
+            },
+        }
+    }
+}
+
 pub enum SceneType {
     CustomScene,
     DefaultScene,
@@ -16,6 +48,7 @@ pub enum SceneType {
     SolarSystem,
 }
 
+#[derive(Resource)]
 pub struct Scene {
     pub scene_type: SceneType,
     pub bodies_count: usize,
@@ -25,21 +58,39 @@ pub struct Scene {
     pub compute: Compute,
 }
 
+impl Scene {
+    pub fn new() -> Self {
+        Self {
+            scene_type: SceneType::DefaultScene,
+            bodies_count: 0,
+            bodies: Vec::new(),
+            bodies_min_mass: 0.0,
+            bodies_max_mass: 0.0,
+            compute: Compute {},
+        }
+    }
 
-pub struct DefaultScene {
-    pub bodies: Vec<Body>,
-}
-pub struct FigureEight {
-    pub bodies: Vec<Body>,
+    pub fn add_body(&mut self, body: Body) {
+        self.bodies.push(body);
+    }
+
+    pub fn add_bodies(&mut self, bodies: Vec<Body>) {
+        self.bodies.extend(bodies);
+    }
+
+    pub fn add_bodies_bundle(&mut self, commands: &mut Commands) {
+        for i in 0..self.bodies.len() {
+            commands.spawn(BodyBundle::new(self.bodies[i].clone()));
+        }
+    }
 }
 
-pub struct SolarSystem {
-    pub bodies: Vec<Body>,
-}
+pub struct DefaultScene;
+pub struct FigureEight;
+pub struct SolarSystem;
+pub struct CustomScene;
 
-pub struct CustomScene {
-    pub bodies: Vec<Body>,
-}impl DefaultScene {
+impl DefaultScene {
     pub fn new() -> Scene {
         let mut bodies = Vec::new();
         let sun = Body {
@@ -80,8 +131,6 @@ pub struct CustomScene {
         }
     }
 }
-
-
 
 impl CustomScene {
     pub fn new(count: usize, min_mass: f32, max_mass: f32) -> Scene {
@@ -186,7 +235,6 @@ impl SolarSystem {
     }
 }
 
-impl CustomScene {}
 pub fn create_scene(
     st: SceneType,
     bodies_count: Option<usize>,
@@ -195,18 +243,9 @@ pub fn create_scene(
 ) -> Scene {
     match st {
         SceneType::CustomScene => {
-            let count = match bodies_count {
-                Some(c) => c,
-                None => 3,
-            };
-            let min_mass = match bodies_min_mass {
-                Some(m) => m,
-                None => 1.0,
-            };
-            let max_mass = match bodies_max_mass {
-                Some(m) => m,
-                None => 5.0,
-            };
+            let count = bodies_count.unwrap_or(3);
+            let min_mass = bodies_min_mass.unwrap_or(1.0);
+            let max_mass = bodies_max_mass.unwrap_or(5.0);
             CustomScene::new(count, min_mass, max_mass)
         }
 
@@ -216,7 +255,7 @@ pub fn create_scene(
     }
 }
 
-pub fn render_and_simulate(scene : &mut Scene, dt: f32) {
+pub fn render_and_simulate(scene: &mut Scene, dt: f32) {
     scene.compute.simulate(dt, G, &mut scene.bodies);
 
     for i in 0..scene.bodies.len() {
