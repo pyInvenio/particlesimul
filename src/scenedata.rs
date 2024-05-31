@@ -11,7 +11,7 @@ const G: f32 = 6.67430e-11;
 #[derive(Bundle)]
 pub struct BodyBundle {
     pub body: Body,
-    pub transform: Transform,
+    // pub transform: Transform,
     pub sprite: SpriteBundle,
 }
 
@@ -27,7 +27,7 @@ impl BodyBundle {
         );
         BodyBundle {
             body,
-            transform: Transform::from_translation(bevy_vec3),
+            // transform: Transform::from_translation(bevy_vec3),
             sprite: SpriteBundle {
                 transform: Transform::from_translation(bevy_vec3),
                 sprite: Sprite {
